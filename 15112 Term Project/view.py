@@ -48,6 +48,6 @@ def getTab(app, x, y):
 def getTabHeight(app):
     viewTabHeight = (app.viewLabelHeight * 0.6) / app.viewTabs
     return (viewTabHeight)
-
+print('test')
 runApp()
 
