@@ -21,41 +21,23 @@ class Buttons:
         self.top = top 
         self.width = width 
         self.height = height
-        self.functon = function
+        self.function = function
 
-    def isPressed(self, app, mouseX, mouseY):
-        if (app.labelLeft <= mouseX < app.labelWidth + app.labelLeft and
-            app.selection != None):
+    def respondToPress(self, app, mx, my):
+        if self.isPressed(mx, my):
             self.function(app)
-    
-def uploadFunction(app):
-    print(app.width, app.height)
 
-def greenFunction(app):
-    for button in app.buttonList:
-        button.w += 5
 
-def purpleFunction(app):
-    for button in app.buttonList:
-        button.color = 'purple'
+    def isPressed(self, mx, my):
+        left = self.left
+        top = self.top
+        right = left + self.width
+        bottom = top + self.height
+        return left<=mx<=right and top<=my<=bottom     
+        
 
-def draw(self, app.icon):
-    iconX = app.labelLeft + (5 * app.labelWidth / 8) 
-    tabHeight = getTabHeight(app)
-    iconY = app.labelTop + (tabHeight / 2)
-    drawImage(app.uploadIcon, iconX, iconY, align='center') 
 
 def onAppStart(app):
-    path = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
-    pilImage2 = loadTransparentPilImage(path)
-    app.cmuImage2 = CMUImage(pilImage2)
-    imageWidth, imageHeight = pilImage2.size
-    pilImage3 = pilImage2.resize((imageWidth//3, imageHeight//3))
-    app.uploadIcon = CMUImage(pilImage3)
-
-    app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
-                      Buttons(50, 146, 105, 96, greenFunction),
-                      Buttons(50, 242, 105, 96, purpleFunction)]
 
     app.height = 1000 
     app.width =  1500
@@ -75,19 +57,69 @@ def onAppStart(app):
     app.viewTabs = 3
     app.viewSelection = None
 
+    app.popupWidth = 400
+    tabHeight = getTabHeight(app)
+    app.popupHeight = app.tabs * tabHeight
+    app.popup = False
+
+    path1 = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
+    pilImage1 = loadTransparentPilImage(path1)
+    uploadWidth, uploadHeight = pilImage1.size
+    uploadImage = pilImage1.resize((uploadWidth//3, uploadHeight//3))
+    app.uploadIcon = CMUImage(uploadImage)
+
+
+    path2 = 'images/x_icon.png' # https://icon-icons.com/icon/x/173468 
+    pilImage2 = loadTransparentPilImage(path2)
+    exitWidth, exitHeight = pilImage2.size
+    pilImage2 = pilImage2.resize((exitWidth//25, exitHeight//25))
+    app.exitIcon = CMUImage(pilImage2)
+    app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
+                      Buttons(400, 40, 40, 40, exitFunction)]
+
+
 def redrawAll(app):
-    drawRect(0, 0, app.width, app.height, fill = 'whiteSmoke')
+    drawRect(0, 0, app.width, app.height, fill = 'gainsboro')
+
+    #popup tab
+    if app.popup == True:
+        drawRect(app.labelLeft, app.labelTop, app.popupWidth, app.popupHeight, fill = 'whitesmoke')
+        #exit
+        drawImage(app.exitIcon, 420, 80, align = 'center')
+
+        
+        
 
     drawRect(app.labelLeft, app.labelTop, app.labelWidth, app.labelHeight, fill='black')
     for tab in range(app.tabs):
         drawTabs(app, tab)
+
+    
     drawRect(app.viewLabelLeft, app.viewLabelTop, app.viewLabelWidth, app.viewLabelHeight, fill = 'gray')
     for viewTab in range(app.viewTabs):
         drawViewTabs(app, viewTab)
 
-    #buttons
+
+    #icons
+
+    #upload
+    iconX = app.labelLeft + (5 * app.labelWidth / 8) 
+    tabHeight = getTabHeight(app)
+    iconY = app.labelTop + (tabHeight / 2)
+    drawImage(app.uploadIcon, iconX, iconY, align='center') 
+
+
+
+
+def uploadFunction(app): #draws a separate tab
+    app.popup = True
+
+def exitFunction(app):
+    app.popup = False
+
+def purpleFunction(app):
     for button in app.buttonList:
-        button.draw(app.icon)
+        button.color = 'purple'
 
 def onMouseMove(app, mouseX, mouseY):
     if (app.labelLeft <= mouseX < app.labelWidth + app.labelLeft):
@@ -102,9 +134,9 @@ def onMouseMove(app, mouseX, mouseY):
         app.viewSelection = None 
         app.selection = None
 
-def onMousePress(app, mouseX, mouseY):
+def onMousePress(app, mx, my):
     for button in app.buttonList:
-        button.isPressed(app, mouseX, mouseY)
+        button.respondToPress(app, mx, my)
 
 def drawTabs(app, tab):
     tabLeft, tabTop = getTabLeftTop(app, tab)
