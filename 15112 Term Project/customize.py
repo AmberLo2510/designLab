@@ -14,6 +14,37 @@ def loadTransparentPilImage(path):
               image.putpixel((i, j), (0, 0, 0, 0))
     return image
 
+
+class Buttons:
+    def __init__(self, left, top, width, height, function):
+        self.left = left
+        self.top = top 
+        self.width = width 
+        self.height = height
+        self.functon = function
+
+    def isPressed(self, app, mouseX, mouseY):
+        if (app.labelLeft <= mouseX < app.labelWidth + app.labelLeft and
+            app.selection != None):
+            self.function(app)
+    
+def uploadFunction(app):
+    print(app.width, app.height)
+
+def greenFunction(app):
+    for button in app.buttonList:
+        button.w += 5
+
+def purpleFunction(app):
+    for button in app.buttonList:
+        button.color = 'purple'
+
+def draw(self, app.icon):
+    iconX = app.labelLeft + (5 * app.labelWidth / 8) 
+    tabHeight = getTabHeight(app)
+    iconY = app.labelTop + (tabHeight / 2)
+    drawImage(app.uploadIcon, iconX, iconY, align='center') 
+
 def onAppStart(app):
     path = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
     pilImage2 = loadTransparentPilImage(path)
@@ -21,6 +52,10 @@ def onAppStart(app):
     imageWidth, imageHeight = pilImage2.size
     pilImage3 = pilImage2.resize((imageWidth//3, imageHeight//3))
     app.uploadIcon = CMUImage(pilImage3)
+
+    app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
+                      Buttons(50, 146, 105, 96, greenFunction),
+                      Buttons(50, 242, 105, 96, purpleFunction)]
 
     app.height = 1000 
     app.width =  1500
@@ -49,13 +84,10 @@ def redrawAll(app):
     drawRect(app.viewLabelLeft, app.viewLabelTop, app.viewLabelWidth, app.viewLabelHeight, fill = 'gray')
     for viewTab in range(app.viewTabs):
         drawViewTabs(app, viewTab)
-    
-    #icons
-    iconX = app.labelLeft + (5 * app.labelWidth / 8) 
-    tabHeight = getTabHeight(app)
-    iconY = app.labelTop + (tabHeight / 2)
-    drawImage(app.uploadIcon, iconX, iconY, align='center') 
 
+    #buttons
+    for button in app.buttonList:
+        button.draw(app.icon)
 
 def onMouseMove(app, mouseX, mouseY):
     if (app.labelLeft <= mouseX < app.labelWidth + app.labelLeft):
@@ -70,6 +102,9 @@ def onMouseMove(app, mouseX, mouseY):
         app.viewSelection = None 
         app.selection = None
 
+def onMousePress(app, mouseX, mouseY):
+    for button in app.buttonList:
+        button.isPressed(app, mouseX, mouseY)
 
 def drawTabs(app, tab):
     tabLeft, tabTop = getTabLeftTop(app, tab)
@@ -139,6 +174,8 @@ def getViewTab(app, x, y):
 def getViewTabHeight(app):
     viewTabHeight = app.viewLabelHeight/ app.viewTabs
     return (viewTabHeight)
+
+
 
 
 runApp()
