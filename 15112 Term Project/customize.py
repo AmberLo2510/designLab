@@ -58,14 +58,13 @@ def onAppStart(app):
     app.viewSelection = None
 
     app.popupWidth = 400
-    tabHeight = getTabHeight(app)
-    app.popupHeight = app.tabs * tabHeight
+    app.popupHeight = app.labelHeight
     app.popup = False
 
     path1 = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
     pilImage1 = loadTransparentPilImage(path1)
     uploadWidth, uploadHeight = pilImage1.size
-    uploadImage = pilImage1.resize((uploadWidth//3, uploadHeight//3))
+    uploadImage = pilImage1.resize((uploadWidth//5, uploadHeight//5))
     app.uploadIcon = CMUImage(uploadImage)
 
 
@@ -74,21 +73,31 @@ def onAppStart(app):
     exitWidth, exitHeight = pilImage2.size
     pilImage2 = pilImage2.resize((exitWidth//25, exitHeight//25))
     app.exitIcon = CMUImage(pilImage2)
+
+    path3 = 'images/text_icon.png' # https://icon-icons.com/icon/x/173468 
+    pilImage3 = loadTransparentPilImage(path3)
+    textWidth, textHeight = pilImage3.size
+    pilImage3 = pilImage3.resize((textWidth// 7, textHeight// 7))
+    app.textIcon = CMUImage(pilImage3)
+
     app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
-                      Buttons(400, 40, 40, 40, exitFunction)]
+                      Buttons(400, 40, 40, 40, exitFunction),
+                      Buttons(1340, 50, 195, 50, frontFunction),
+                      Buttons(50, 146, 105, 96, textFunction)]
+    
+    #1345, 50 
+    #1540, 50
 
 
 def redrawAll(app):
     drawRect(0, 0, app.width, app.height, fill = 'gainsboro')
+    drawRect(app.labelLeft, app.labelTop, app.popupWidth, app.popupHeight, fill = 'whitesmoke')
 
     #popup tab
     if app.popup == True:
-        drawRect(app.labelLeft, app.labelTop, app.popupWidth, app.popupHeight, fill = 'whitesmoke')
         #exit
         drawImage(app.exitIcon, 420, 80, align = 'center')
 
-        
-        
 
     drawRect(app.labelLeft, app.labelTop, app.labelWidth, app.labelHeight, fill='black')
     for tab in range(app.tabs):
@@ -103,23 +112,29 @@ def redrawAll(app):
     #icons
 
     #upload
-    iconX = app.labelLeft + (5 * app.labelWidth / 8) 
-    tabHeight = getTabHeight(app)
-    iconY = app.labelTop + (tabHeight / 2)
+    iconX = 112
+    iconY = 95
     drawImage(app.uploadIcon, iconX, iconY, align='center') 
 
+    #text
+    textX = 102
+    textY = 196
+    drawImage(app.textIcon, textX, textY, align='center') 
 
 
 
 def uploadFunction(app): #draws a separate tab
     app.popup = True
 
+def textFunction(app):
+    print('entered')
+    app.popup = True
+
 def exitFunction(app):
     app.popup = False
 
-def purpleFunction(app):
-    for button in app.buttonList:
-        button.color = 'purple'
+def frontFunction(app):
+    pass
 
 def onMouseMove(app, mouseX, mouseY):
     if (app.labelLeft <= mouseX < app.labelWidth + app.labelLeft):
