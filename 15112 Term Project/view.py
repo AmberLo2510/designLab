@@ -1,18 +1,23 @@
 from cmu_graphics import *
 import math 
-from customize import onAppStart
+def onAppStart(app):
+    app.viewLabelWidth = 0.08 * app.width
+    app.viewLabelLeft = app.width - app.labelLeft - app.viewLabelWidth
+    app.viewLabelTop = app.labelTop
+    app.viewLabelHeight = app.height * 0.3
+    app.viewTabs = 3
+
 def redrawAll(app):
     drawRect(app.viewLabelLeft, app.viewLabelTop, app.viewLabelWidth, app.viewLabelHeight, fill = 'gray')
     for viewTab in range(app.viewTabs):
         drawTabs(app, viewTab)
 
-def onMousePress(app, mouseX, mouseY):
+def onMouseMove(app, mouseX, mouseY):
     selectedTab = getTab(app, mouseX, mouseY)
     if selectedTab != None:
-      if selectedTab == app.selection:
-          app.selection = None
-      else:
           app.selection = selectedTab
+    else:
+        app.selection = None
 
 def drawTabs(app, viewTab):
     viewTabLeft, viewTabTop = getTabLeftTop(app, viewTab)
@@ -48,6 +53,6 @@ def getTab(app, x, y):
 def getTabHeight(app):
     viewTabHeight = (app.viewLabelHeight * 0.6) / app.viewTabs
     return (viewTabHeight)
-print('test')
+
 runApp()
 
