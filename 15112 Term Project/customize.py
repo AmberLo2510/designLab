@@ -76,10 +76,11 @@ def onAppStart(app):
     app.fontColor = 'black'
     app.textX = 302.5
     app.textY = app.labelTop + 50
+    app.shirtLeft = 895 
+    app.shirtTop = app.height / 2
+    
 
-
-    app.artworkCols = 2 
-    app.artworkRows = 4 #for now 
+   
 
 
     path1 = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
@@ -137,32 +138,45 @@ def onAppStart(app):
     pilImage9 = loadTransparentPilImage(path9)
     redCrossWidth, redCrossHeight = pilImage9.size
     pilImage9 = pilImage9.resize((redCrossWidth // 11, redCrossHeight // 11))
-    app.redCrossLogo = CMUImage(pilImage9)
     
     path10 = 'charityLogos/breast_cancer.png' #https://www.citypng.com/photo/18104/png-breast-cancer-awareness-ribbon-clipart
     pilImage10 = loadTransparentPilImage(path10)
     breastCancerWidth, breastCancerHeight = pilImage10.size
-    app.BClogo = pilImage10.resize((breastCancerWidth // 11, 
+    pilImage10 = pilImage10.resize((breastCancerWidth // 11, 
                                     breastCancerHeight // 11))
+
+    path11 = 'images/undo_icon.png' #https://www.shutterstock.com/image-vector/undo-button-icon-1153185847
+    pilImage11 = loadTransparentPilImage(path11)
+    artworkWidth, artworkHeight = pilImage11.size
+    pilImage11 = pilImage11.resize((artworkWidth // 11, artworkHeight // 11))
+    app.undoIcon = CMUImage(pilImage11)
     
-    app.breastCancerLogo = CMUImage(pilImage10)
+    
+    app.artworkCols = 2 
+    app.artworkRows = 1 #for now 
+    app.artSelected = None 
+    app.cx = app.shirtLeft + 100
+    app.cy = app.shirtTop + 200
+    app.drawLogo = False
 
     app.charityPath = [pilImage9, pilImage10]
-    
     app.artworkList = ['charityLogos', 'sports']
-
-    app.charityList = ['breast_cancer', 'redCross_logo']
+    app.logoList = [ ]
 
     app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
                       Buttons(400, 40, 40, 60, exitFunction),
                       Buttons(1340, 50, 195, 100, frontFunction),
                       Buttons(1345, 150, 1950, 100, backFunction),
                       Buttons(50, 146, 105, 96, textFunction),
-                      Buttons(50, 242, 105, 96, artworkFunction)]
-    app.charityInd = 0 
-def loadLogo(app, i):
-        app.loadLogo = CMUImage(app.charityPath[i]) #index will be equal to the row?
+                      Buttons(50, 242, 105, 96, artworkFunction),
+                      Buttons(450, 50, 40, 40, undoFunction)]
+                    #   Buttons(450, 90, 40, 40, redoFunction)
 
+    app.boundLeft = 730
+    app.boundTop = 260
+    app.boundWidth = 339
+    app.boundHeight = 585
+    app. drawBounds = False
 
 
 def redrawAll(app):
@@ -198,7 +212,12 @@ def redrawAll(app):
     if app.showArtworkList == True:
         for row in range(app.artworkRows):
             for col in range(app.artworkCols):
-                drawArtwork(app, row, col)
+                for i in range(len(app.charityPath)):    
+                    if Index(row, col) == i:
+                        drawArtwork(app, row, col, i)
+
+  
+
 
     #icons
 
@@ -210,12 +229,15 @@ def redrawAll(app):
     
     #artwork
     drawImage(app.artworkIcon, 102, 290, align='center') 
+
+    #undo
+    drawImage(app.undoIcon, 450, 50) 
     
     #shirt
     if app.front == True:
-        drawImage(app.shirtFront, 895, app.height / 2, align='center') 
+        drawImage(app.shirtFront, app.shirtLeft, app.shirtTop, align='center') 
     else:
-        drawImage(app.shirtBack, 895, app.height / 2, align='center') 
+        drawImage(app.shirtBack, app.shirtLeft, app.shirtTop, align='center') 
     
     #front and back icons
     drawImage(app.shirtFrontIcon, 1397.5, 90, align='center') 
@@ -223,10 +245,24 @@ def redrawAll(app):
 
     drawImage(app.shirtBackIcon, 1397.5, 190, align='center') 
     drawLabel("Back", 1397.5, 230, align='center', font='montserrat', size = 15)
+
+    if app.drawBounds == True:
+        drawRect(app.boundLeft, app.boundTop, app.boundWidth, app.boundHeight, 
+                 border='gray', borderWidth=4, dashes = True, fill = None)
+
+    if app.drawLogo == True:
+        for i in app.logoList:
+            logo = CMUImage(app.charityPath[i])
+            drawImage(logo, app.cx, app.cy, align = 'center')
     
 # def drawOutFonts(app):
 #     for fontIndex in range(len(app.font)):
 #             drawFonts(app, fontIndex)
+
+def undoFunction(app):
+    if len(app.logoList) != 0:
+        app.logoList.pop()
+
 
 def uploadFunction(app): #draws a separate tab
     app.popup = True
@@ -267,17 +303,21 @@ def onMouseMove(app, mouseX, mouseY):
         selectedFont = getFont(app, mouseX, mouseY)
         if selectedFont != None:
             app.fontSelection = selectedFont
-    
-    
-    selectedArt = getArt(app, mouseX, mouseY)
-    if selectedArt != None:
-        app.artSelected = selectedArt
+
+    elif 155 < mouseX < 450 and app.showArtworkList == True:
+        for i in range(len(app.charityPath)):
+            selectedArt = getArt(app, mouseX, mouseY, i)
+            if selectedArt != None:
+                app.artSelected = selectedArt
 
     else:
         app.viewSelection = None 
         app.selection = None
+        app.artSelected = None
+def onMouseRelease(app, mx, my):
+    app.drawBounds = False
 
-def direction(row, col):
+def Index(row, col):
     if (row, col) == (0, 0): return 0
     elif (row, col) == (0, 1): return 1
     elif (row, col) ==(1, 0): return 2
@@ -295,50 +335,68 @@ def onMousePress(app, mx, my):
         selectedFontInd = getFont(app, mx, my)
         if selectedFontInd != None:
             app.customFont = app.font[selectedFontInd]
+    
+    if app.artSelected != None:  
+        row, col = getArtPressed(app, mx,my)
+        app.logoList.append(Index(row, col))
+        app.drawLogo = True
 
-    if app.showArtworkList == True:
-        selectedArt = getArt(app, mx, my)
-        if selectedArt != None:
-            selectedArtRow = selectedArt[0]
-            selectedArtCol = selectedArt[1]
-            selectedArtInd = direction(selectedArtRow, selectedArtCol)
-            print(selectedArtInd)
-            app.charityInd = selectedArtInd
 
-#artwork
-def drawArtwork(app, row, col):
-    artLeft, artTop = getArtLeftTop(app, row, col)
-    if (row,col) == app.artSelected: 
-        border = 'blue'
-    else:
-        border = None
-    drawImage(app.redCrossLogo, artLeft, artTop, border = border)
-
-def getArtLeftTop(app, row, col):
-    print('test', app.charityInd)
-    image = app.charityList[app.charityInd]
-    artWidth, artHeight = image.size
-    artLeft = 165 + col * artWidth
-    artTop = app.labelTop + (row + 1) * artHeight
-    return artLeft, artTop
-
-def getArtSize(app):
-    artHeight = (app.labelHeight - 100)// app.artworkRows
-    artWidth = 300 // app.artworkCols
-    return artWidth, artHeight
-
-def getArt(app, mx, my):
-    dx = mx - app.labelLeft
-    dy = my - app.labelTop 
-    artWidth, artHeight = getArtSize(app) 
-
-    row = math.floor(dy / artHeight)
-    col = math.floor(dx / artWidth)
+def getArtPressed(app, mx, my): 
+    dx = mx - 170
+    dy = my - 220
+    row = math.floor(dy / 50)
+    col = math.floor(dx / 120)
     if (0 <= row < app.artworkRows) and (0 <= col < app.artworkCols):
         return (row, col)
     else:
         return None
+    
+def onMouseDrag(app, mx, my):
+    if app.showArtworkList == True:
+        app.drawBounds = True
+        if (app.boundLeft < mx < app.boundLeft + app.boundWidth and 
+            app.boundTop < my < app.boundTop + app.boundHeight):
+            app.cx = mx
+            app.cy = my
 
+
+#artwork
+
+
+
+def drawArtwork(app, row, col, i):
+    image = app.charityPath[i]
+    artLeft, artTop = getArtLeftTop(app, row, col, i)
+    artWidth, artHeight = image.size
+    artCX = artLeft + 70 + (artWidth // 2) * col
+    artCY = artTop + 100 + (artHeight // 2) * row  
+    if (row,col) == app.artSelected: 
+        border = 'blue'
+    else:
+        border = None
+    logo = CMUImage(image)
+    drawImage(logo, artCX, artCY, border = border, align = 'center')
+
+def getArtLeftTop(app, row, col, i):
+    image = app.charityPath[i]
+    artWidth, artHeight = image.size
+    artLeft = 170 + col * (artWidth + 50)
+    artTop = 150 + row  * (artHeight + 30) 
+    return artLeft, artTop
+
+
+def getArt(app, mx, my, i): #might have to change this
+    dx = mx - 170
+    dy = my - 220
+    image = app.charityPath[i]
+    artWidth, artHeight = image.size
+    row = math.floor(dy / artHeight)
+    col = math.floor(dx / 120)
+    if (0 <= row < app.artworkRows) and (0 <= col < app.artworkCols):
+        return (row, col)
+    else:
+        return None
 
 
 #fonts
