@@ -34,7 +34,8 @@ class Buttons:
         right = left + self.width
         bottom = top + self.height
         return left<=mx<=right and top<=my<=bottom     
-        
+
+
 
 
 def onAppStart(app):
@@ -61,6 +62,22 @@ def onAppStart(app):
     app.popupHeight = app.labelHeight
     app.popup = False
 
+    app.front = True
+
+    app.showArtworkList = False
+    app.text = False
+    app.font = (['arial', 'monospace', 'caveat', 'cinzel', 'montserrat','grenze', 'sacramento', 'orbitron'])
+    app.fontSelection = None
+    app.fontLeft = 302.5
+    app.fontTop = app.labelTop
+    app.fontWidth = 300
+    app.customFont = 'arial'
+    app.fontSize = 20
+    app.fontColor = 'black'
+    app.textX = 302.5
+    app.textY = app.labelTop + 50
+
+
     path1 = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
     pilImage1 = loadTransparentPilImage(path1)
     uploadWidth, uploadHeight = pilImage1.size
@@ -74,24 +91,75 @@ def onAppStart(app):
     pilImage2 = pilImage2.resize((exitWidth//25, exitHeight//25))
     app.exitIcon = CMUImage(pilImage2)
 
-    path3 = 'images/text_icon.png' # https://icon-icons.com/icon/x/173468 
+    path3 = 'images/text_icon.png' # https://pngtree.com/freepng/text-icon-cursor-abstract-black_8287456.html 
     pilImage3 = loadTransparentPilImage(path3)
     textWidth, textHeight = pilImage3.size
     pilImage3 = pilImage3.resize((textWidth// 7, textHeight// 7))
     app.textIcon = CMUImage(pilImage3)
 
-    app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
-                      Buttons(400, 40, 40, 40, exitFunction),
-                      Buttons(1340, 50, 195, 50, frontFunction),
-                      Buttons(50, 146, 105, 96, textFunction)]
-    
-    #1345, 50 
-    #1540, 50
 
+    path4 = 'images/front.png' # https://shop.companycasuals.com/p/3985_AquaticBl
+    pilImage4 = loadTransparentPilImage(path4)
+    frontWidth, frontHeight = pilImage4.size
+    pilImage4 = pilImage4.resize(((frontWidth * 3)// 2, (frontHeight * 3)// 2))
+    app.shirtFront = CMUImage(pilImage4)
+
+    
+    path5 = 'images/frontIcon.png' # https://shop.companycasuals.com/p/3985_AquaticBl 
+    pilImage5 = loadTransparentPilImage(path5)
+    frontIconWidth, frontIconHeight = pilImage5.size
+    pilImage5 = pilImage5.resize((frontIconWidth // 9, frontIconHeight // 9))
+    app.shirtFrontIcon = CMUImage(pilImage5)
+
+    path6 = 'images/backIcon.png' # https://shop.companycasuals.com/p/3985_AquaticBl
+    pilImage6 = loadTransparentPilImage(path6)
+    backIconWidth, backIconHeight = pilImage5.size
+    pilImage6 = pilImage6.resize((backIconWidth, backIconHeight))
+    app.shirtBackIcon = CMUImage(pilImage6)
+
+    path7 = 'images/back.png' # https://shop.companycasuals.com/p/3985_AquaticBl
+    pilImage7 = loadTransparentPilImage(path7)
+    backWidth, backHeight = pilImage7.size
+    pilImage7 = pilImage7.resize(((backWidth * 3)// 2, (backHeight * 3)// 2))
+    app.shirtBack = CMUImage(pilImage7)
+
+    path8 = 'images/artwork_icon.png' # https://icons8.com/icons/set/picture--white
+    pilImage8 = loadTransparentPilImage(path8)
+    artworkWidth, artworkHeight = pilImage8.size
+    pilImage8 = pilImage8.resize((artworkWidth // 11, artworkHeight // 11))
+    app.artworkIcon = CMUImage(pilImage8)
+
+
+    # path9 = 'charityLogos/redCross_logo.png' #https://en.m.wikipedia.org/wiki/File:American_Red_Cross_logo.svg
+    # pilImage9 = loadTransparentPilImage(path9)
+    # redCrossWidth, redCrossHeight = pilImage9.size
+    # pilImage9 = pilImage9.resize((redCrossWidth // 11, redCrossHeight // 11))
+    # app.redCrossLogo = CMUImage(pilImage9)
+
+    # path10 = 'charityLogos/breast_cancer.png' #https://www.citypng.com/photo/18104/png-breast-cancer-awareness-ribbon-clipart
+    # pilImage10 = loadTransparentPilImage(path10)
+    # breastCancerWidth, breastCancerHeight = pilImage10.size
+    # pilImage10 = pilImage10.resize((breastCancerWidth // 11, 
+    #                                 breastCancerHeight // 11))
+    # app.breastCancerLogo = CMUImage(pilImage10)
+
+    # app.artworkList = ['charityLogos', 'sports']
+
+    # app.charityList = ['breast_cancer', 'redCross_logo']
+
+    app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
+                      Buttons(400, 40, 40, 60, exitFunction),
+                      Buttons(1340, 50, 195, 100, frontFunction),
+                      Buttons(1345, 150, 1950, 100, backFunction),
+                      Buttons(50, 146, 105, 96, textFunction),
+                      Buttons(50, 242, 105, 96, artworkFunction)]
+    
 
 def redrawAll(app):
     drawRect(0, 0, app.width, app.height, fill = 'gainsboro')
-    drawRect(app.labelLeft, app.labelTop, app.popupWidth, app.popupHeight, fill = 'whitesmoke')
+    drawRect(app.labelLeft, app.labelTop, app.popupWidth, 
+             app.popupHeight, fill = 'whitesmoke')
+    
 
     #popup tab
     if app.popup == True:
@@ -99,42 +167,75 @@ def redrawAll(app):
         drawImage(app.exitIcon, 420, 80, align = 'center')
 
 
-    drawRect(app.labelLeft, app.labelTop, app.labelWidth, app.labelHeight, fill='black')
+    drawRect(app.labelLeft, app.labelTop, app.labelWidth, 
+             app.labelHeight, fill='black')
     for tab in range(app.tabs):
         drawTabs(app, tab)
 
     
-    drawRect(app.viewLabelLeft, app.viewLabelTop, app.viewLabelWidth, app.viewLabelHeight, fill = 'gray')
+    drawRect(app.viewLabelLeft, app.viewLabelTop, app.viewLabelWidth, 
+             app.viewLabelHeight, fill = 'whitesmoke')
     for viewTab in range(app.viewTabs):
         drawViewTabs(app, viewTab)
+
+    #text
+    if app.text == True:
+        # text = input("Add Text: ") # need to fix how to integrate user input onto cmu graph
+        drawLabel('text', app.textX, app.textY, font = f'{app.customFont}',
+                  size = app.fontSize, fill = app.fontColor)
 
 
     #icons
 
     #upload
-    iconX = 112
-    iconY = 95
-    drawImage(app.uploadIcon, iconX, iconY, align='center') 
+    drawImage(app.uploadIcon, 112, 95, align='center') 
 
     #text
-    textX = 102
-    textY = 196
-    drawImage(app.textIcon, textX, textY, align='center') 
+    drawImage(app.textIcon, 102, 196, align='center') 
+    
+    #artwork
+    drawImage(app.artworkIcon, 102, 290, align='center') 
+    
+    #shirt
+    if app.front == True:
+        drawImage(app.shirtFront, 895, app.height / 2, align='center') 
+    else:
+        drawImage(app.shirtBack, 895, app.height / 2, align='center') 
+    
+    #front and back icons
+    drawImage(app.shirtFrontIcon, 1397.5, 90, align='center') 
+    drawLabel("Front", 1397.5, 130, align='center', font='montserrat', size = 15)
 
-
+    drawImage(app.shirtBackIcon, 1397.5, 190, align='center') 
+    drawLabel("Back", 1397.5, 230, align='center', font='montserrat', size = 15)
+    
+# def drawOutFonts(app):
+#     for fontIndex in range(len(app.font)):
+#             drawFonts(app, fontIndex)
 
 def uploadFunction(app): #draws a separate tab
     app.popup = True
+    app.text = False
 
 def textFunction(app):
-    print('entered')
     app.popup = True
+    app.text = True
+
+
+def artworkFunction(app):
+    app.popup = True
+    app.showArtworkList = True
+    app.text = False
 
 def exitFunction(app):
     app.popup = False
+    app.text = False
 
 def frontFunction(app):
-    pass
+    app.front = True
+
+def backFunction(app):
+    app.front = False
 
 def onMouseMove(app, mouseX, mouseY):
     if (app.labelLeft <= mouseX < app.labelWidth + app.labelLeft):
@@ -145,6 +246,12 @@ def onMouseMove(app, mouseX, mouseY):
         selectedViewTab = getViewTab(app, mouseX, mouseY)
         if selectedViewTab != None:
             app.viewSelection = selectedViewTab
+    
+    elif (app.fontLeft <= mouseX < app.fontLeft + (app.fontWidth//2)): 
+        selectedFont = getFont(app, mouseX, mouseY)
+        if selectedFont != None:
+            app.fontSelection = selectedFont
+
     else:
         app.viewSelection = None 
         app.selection = None
@@ -152,7 +259,49 @@ def onMouseMove(app, mouseX, mouseY):
 def onMousePress(app, mx, my):
     for button in app.buttonList:
         button.respondToPress(app, mx, my)
+    
+    if app.fontSelection != None:
+        selectedFontInd = getFont(app, mx, my)
+        if selectedFontInd != None:
+            app.customFont = app.font[selectedFontInd]
 
+
+#fonts
+def drawFonts(app, fontIndex):
+    fontLeft, fontTop = getFontLeftTop(app, fontIndex)
+    fontHeight = getFontHeight(app)
+    if fontIndex == app.fontSelection:
+        color = 'blue'
+    else:
+        color = None
+    drawLabel(f'{app.font[fontIndex]}', fontLeft, 
+              fontTop + (fontHeight//2), font = f'{app.font[fontIndex]}',
+               fill = color, size = 30)
+    
+    
+def getFontLeftTop(app, font):
+    fontHeight = getFontHeight(app)
+    fontLeft = app.fontLeft 
+    tabTop = app.fontTop + font * fontHeight
+    return (fontLeft, tabTop) 
+
+def getFont(app, x, y):
+    dy = y - app.fontTop
+    fontHeight = getFontHeight(app)
+    fontInd = math.floor(dy / fontHeight)
+    if ((0 <= fontInd < len(app.font)) and 
+        (app.fontLeft <= x < app.fontWidth + app.fontLeft)): 
+      return fontInd
+    else:
+        return None
+    
+def getFontHeight(app):
+    fontHeight = app.labelHeight / len(app.font)
+    return (fontHeight)
+
+
+
+#tabs
 def drawTabs(app, tab):
     tabLeft, tabTop = getTabLeftTop(app, tab)
     tabHeight = getTabHeight(app)
