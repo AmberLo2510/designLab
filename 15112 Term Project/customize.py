@@ -78,6 +78,10 @@ def onAppStart(app):
     app.textY = app.labelTop + 50
 
 
+    app.artworkCols = 2 
+    app.artworkRows = 4 #for now 
+
+
     path1 = 'images/upload_icon.png' # https://www.creativefabrica.com/product/cloud-data-upload-icon/ 
     pilImage1 = loadTransparentPilImage(path1)
     uploadWidth, uploadHeight = pilImage1.size
@@ -129,23 +133,25 @@ def onAppStart(app):
     pilImage8 = pilImage8.resize((artworkWidth // 11, artworkHeight // 11))
     app.artworkIcon = CMUImage(pilImage8)
 
+    path9 = 'charityLogos/redCross_logo.png' #https://en.m.wikipedia.org/wiki/File:American_Red_Cross_logo.svg
+    pilImage9 = loadTransparentPilImage(path9)
+    redCrossWidth, redCrossHeight = pilImage9.size
+    pilImage9 = pilImage9.resize((redCrossWidth // 11, redCrossHeight // 11))
+    app.redCrossLogo = CMUImage(pilImage9)
+    
+    path10 = 'charityLogos/breast_cancer.png' #https://www.citypng.com/photo/18104/png-breast-cancer-awareness-ribbon-clipart
+    pilImage10 = loadTransparentPilImage(path10)
+    breastCancerWidth, breastCancerHeight = pilImage10.size
+    app.BClogo = pilImage10.resize((breastCancerWidth // 11, 
+                                    breastCancerHeight // 11))
+    
+    app.breastCancerLogo = CMUImage(pilImage10)
 
-    # path9 = 'charityLogos/redCross_logo.png' #https://en.m.wikipedia.org/wiki/File:American_Red_Cross_logo.svg
-    # pilImage9 = loadTransparentPilImage(path9)
-    # redCrossWidth, redCrossHeight = pilImage9.size
-    # pilImage9 = pilImage9.resize((redCrossWidth // 11, redCrossHeight // 11))
-    # app.redCrossLogo = CMUImage(pilImage9)
+    app.charityPath = [pilImage9, pilImage10]
+    
+    app.artworkList = ['charityLogos', 'sports']
 
-    # path10 = 'charityLogos/breast_cancer.png' #https://www.citypng.com/photo/18104/png-breast-cancer-awareness-ribbon-clipart
-    # pilImage10 = loadTransparentPilImage(path10)
-    # breastCancerWidth, breastCancerHeight = pilImage10.size
-    # pilImage10 = pilImage10.resize((breastCancerWidth // 11, 
-    #                                 breastCancerHeight // 11))
-    # app.breastCancerLogo = CMUImage(pilImage10)
-
-    # app.artworkList = ['charityLogos', 'sports']
-
-    # app.charityList = ['breast_cancer', 'redCross_logo']
+    app.charityList = ['breast_cancer', 'redCross_logo']
 
     app.buttonList = [Buttons(50, 50, 105, 96, uploadFunction),
                       Buttons(400, 40, 40, 60, exitFunction),
@@ -153,7 +159,11 @@ def onAppStart(app):
                       Buttons(1345, 150, 1950, 100, backFunction),
                       Buttons(50, 146, 105, 96, textFunction),
                       Buttons(50, 242, 105, 96, artworkFunction)]
-    
+    app.charityInd = 0 
+def loadLogo(app, i):
+        app.loadLogo = CMUImage(app.charityPath[i]) #index will be equal to the row?
+
+
 
 def redrawAll(app):
     drawRect(0, 0, app.width, app.height, fill = 'gainsboro')
@@ -184,6 +194,11 @@ def redrawAll(app):
         drawLabel('text', app.textX, app.textY, font = f'{app.customFont}',
                   size = app.fontSize, fill = app.fontColor)
 
+    #artwork
+    if app.showArtworkList == True:
+        for row in range(app.artworkRows):
+            for col in range(app.artworkCols):
+                drawArtwork(app, row, col)
 
     #icons
 
@@ -230,6 +245,7 @@ def artworkFunction(app):
 def exitFunction(app):
     app.popup = False
     app.text = False
+    app.showArtworkList = False
 
 def frontFunction(app):
     app.front = True
@@ -251,10 +267,25 @@ def onMouseMove(app, mouseX, mouseY):
         selectedFont = getFont(app, mouseX, mouseY)
         if selectedFont != None:
             app.fontSelection = selectedFont
+    
+    
+    selectedArt = getArt(app, mouseX, mouseY)
+    if selectedArt != None:
+        app.artSelected = selectedArt
 
     else:
         app.viewSelection = None 
         app.selection = None
+
+def direction(row, col):
+    if (row, col) == (0, 0): return 0
+    elif (row, col) == (0, 1): return 1
+    elif (row, col) ==(1, 0): return 2
+    elif (row, col) == (1, 1): return 3
+    elif (row, col) ==(2, 0): return 4
+    elif (row, col) == (2, 1): return 5
+    elif (row, col) ==(3, 0): return 6
+    elif (row, col) == (3, 1): return 7
 
 def onMousePress(app, mx, my):
     for button in app.buttonList:
@@ -264,6 +295,50 @@ def onMousePress(app, mx, my):
         selectedFontInd = getFont(app, mx, my)
         if selectedFontInd != None:
             app.customFont = app.font[selectedFontInd]
+
+    if app.showArtworkList == True:
+        selectedArt = getArt(app, mx, my)
+        if selectedArt != None:
+            selectedArtRow = selectedArt[0]
+            selectedArtCol = selectedArt[1]
+            selectedArtInd = direction(selectedArtRow, selectedArtCol)
+            print(selectedArtInd)
+            app.charityInd = selectedArtInd
+
+#artwork
+def drawArtwork(app, row, col):
+    artLeft, artTop = getArtLeftTop(app, row, col)
+    if (row,col) == app.artSelected: 
+        border = 'blue'
+    else:
+        border = None
+    drawImage(app.redCrossLogo, artLeft, artTop, border = border)
+
+def getArtLeftTop(app, row, col):
+    print('test', app.charityInd)
+    image = app.charityList[app.charityInd]
+    artWidth, artHeight = image.size
+    artLeft = 165 + col * artWidth
+    artTop = app.labelTop + (row + 1) * artHeight
+    return artLeft, artTop
+
+def getArtSize(app):
+    artHeight = (app.labelHeight - 100)// app.artworkRows
+    artWidth = 300 // app.artworkCols
+    return artWidth, artHeight
+
+def getArt(app, mx, my):
+    dx = mx - app.labelLeft
+    dy = my - app.labelTop 
+    artWidth, artHeight = getArtSize(app) 
+
+    row = math.floor(dy / artHeight)
+    col = math.floor(dx / artWidth)
+    if (0 <= row < app.artworkRows) and (0 <= col < app.artworkCols):
+        return (row, col)
+    else:
+        return None
+
 
 
 #fonts
